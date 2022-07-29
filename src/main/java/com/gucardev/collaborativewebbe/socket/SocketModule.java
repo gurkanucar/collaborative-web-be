@@ -24,22 +24,22 @@ public class SocketModule {
         this.server = server;
         server.addConnectListener(onConnected());
         server.addDisconnectListener(onDisconnected());
-        server.addEventListener("document_write", Message.class, onChatReceived());
-        server.addEventListener("document_get", Project.class, documentGet());
-        server.addEventListener("document_save", Project.class, documentSave());
+        server.addEventListener("project_write", Message.class, onChatReceived());
+        server.addEventListener("project_get", Project.class, projectGet());
+        server.addEventListener("project_save", Project.class, projectSave());
 
     }
 
-    private DataListener<Project> documentGet() {
+    private DataListener<Project> projectGet() {
         return (senderClient, data, ackSender) -> {
-            senderClient.getNamespace().getRoomOperations(data.getRoom()).sendEvent("document_retrieved",
+            senderClient.getNamespace().getRoomOperations(data.getRoom()).sendEvent("project_retrieved",
                     projectService.projectToJsonString(projectService.getOrCreateByDefaultValues(data.getRoom())));
         };
     }
 
-    private DataListener<Project> documentSave() {
+    private DataListener<Project> projectSave() {
         return (senderClient, data, ackSender) -> {
-            senderClient.getNamespace().getRoomOperations(data.getRoom()).sendEvent("document_saved",
+            senderClient.getNamespace().getRoomOperations(data.getRoom()).sendEvent("project_saved",
                     projectService.projectToJsonString(projectService.update(data)));
         };
     }
@@ -48,7 +48,7 @@ public class SocketModule {
         return (senderClient, data, ackSender) -> {
             for (SocketIOClient client : senderClient.getNamespace().getRoomOperations(data.getRoom()).getClients()) {
                 if (!client.getSessionId().equals(senderClient.getSessionId())) {
-                    client.sendEvent("document_read",
+                    client.sendEvent("project_read",
                             Message.builder().data(data.getData()).type(data.getType()).build());
                 }
             }
