@@ -1,5 +1,6 @@
 package com.gucardev.collaborativewebbe.service;
 
+import com.gucardev.collaborativewebbe.constant.DefaultProjectValues;
 import com.gucardev.collaborativewebbe.exception.GeneralException;
 import com.gucardev.collaborativewebbe.model.Project;
 import com.gucardev.collaborativewebbe.repository.ProjectRepository;
@@ -44,8 +45,29 @@ public class ProjectService {
         return projectRepository.save(project);
     }
 
+    public Project getOrCreateByDefaultValues(String room) {
+        if (existsByRoom(room)) {
+            log.info("Project already exists");
+            return getProjectByRoom(room);
+        }
+        var project = Project.builder()
+                .room(room)
+                .html(DefaultProjectValues.HTML)
+                .css(DefaultProjectValues.CSS)
+                .js(DefaultProjectValues.JS)
+                .build();
+        log.info("Project saved");
+        return create(project);
+    }
+
 
     public Project update(Project project) {
+        if (!existsByRoom(project.getRoom())) {
+            project.setHtml(DefaultProjectValues.HTML);
+            project.setCss(DefaultProjectValues.CSS);
+            project.setJs(DefaultProjectValues.JS);
+            return create(project);
+        }
         var existing = getProjectByRoom(project.getRoom());
         existing.setHtml(project.getHtml());
         existing.setCss(project.getCss());
