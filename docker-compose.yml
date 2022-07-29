@@ -20,7 +20,7 @@ services:
     environment:
       - ME_CONFIG_MONGODB_SERVER=mongodb
     ports:
-      - '8090:8081'
+      - '8081:8081'
     restart: always
     volumes:
       - ./data:/data/db
@@ -31,7 +31,8 @@ services:
       context: .
       dockerfile: Dockerfile
     ports:
-      - "8082:8082"
+      - "8080:8080"
+      - "8085:8085"
     restart: always
     links:
       - mongodb
