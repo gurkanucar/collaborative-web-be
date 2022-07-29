@@ -6,7 +6,8 @@ import com.corundumstudio.socketio.listener.ConnectListener;
 import com.corundumstudio.socketio.listener.DataListener;
 import com.corundumstudio.socketio.listener.DisconnectListener;
 import com.gucardev.collaborativewebbe.model.Message;
-import com.gucardev.collaborativewebbe.service.SocketService;
+import com.gucardev.collaborativewebbe.model.Project;
+import com.gucardev.collaborativewebbe.service.ProjectService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
@@ -15,18 +16,33 @@ import org.springframework.stereotype.Component;
 public class SocketModule {
 
 
-    private final SocketService socketService;
+    private final ProjectService projectService;
     private final SocketIOServer server;
 
-    public SocketModule(SocketIOServer server, SocketService socketService) {
-        this.socketService = socketService;
+    public SocketModule(SocketIOServer server, ProjectService projectService) {
+        this.projectService = projectService;
         this.server = server;
         server.addConnectListener(onConnected());
         server.addDisconnectListener(onDisconnected());
         server.addEventListener("document_write", Message.class, onChatReceived());
+        server.addEventListener("document_get", Project.class, documentGet());
+        server.addEventListener("document_save", Project.class, documentSave());
 
     }
 
+    private DataListener<Project> documentGet() {
+        return (senderClient, data, ackSender) -> {
+            senderClient.getNamespace().getRoomOperations(data.getRoom()).sendEvent("document_retrieved",
+                    projectService.projectToJsonString(projectService.getProjectByRoom(data.getRoom())));
+        };
+    }
+
+    private DataListener<Project> documentSave() {
+        return (senderClient, data, ackSender) -> {
+            senderClient.getNamespace().getRoomOperations(data.getRoom()).sendEvent("document_saved",
+                    projectService.projectToJsonString(projectService.update(data)));
+        };
+    }
 
     private DataListener<Message> onChatReceived() {
         return (senderClient, data, ackSender) -> {
