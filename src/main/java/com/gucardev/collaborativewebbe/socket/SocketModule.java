@@ -33,7 +33,7 @@ public class SocketModule {
     private DataListener<Project> documentGet() {
         return (senderClient, data, ackSender) -> {
             senderClient.getNamespace().getRoomOperations(data.getRoom()).sendEvent("document_retrieved",
-                    projectService.projectToJsonString(projectService.getProjectByRoom(data.getRoom())));
+                    projectService.projectToJsonString(projectService.getOrCreateByDefaultValues(data.getRoom())));
         };
     }
 
@@ -46,7 +46,7 @@ public class SocketModule {
 
     private DataListener<Message> onChatReceived() {
         return (senderClient, data, ackSender) -> {
-            for (SocketIOClient client : senderClient.getNamespace().getRoomOperations("room1").getClients()) {
+            for (SocketIOClient client : senderClient.getNamespace().getRoomOperations(data.getRoom()).getClients()) {
                 if (!client.getSessionId().equals(senderClient.getSessionId())) {
                     client.sendEvent("document_read",
                             Message.builder().data(data.getData()).type(data.getType()).build());
@@ -58,8 +58,10 @@ public class SocketModule {
 
     private ConnectListener onConnected() {
         return (client) -> {
-            client.joinRoom("room1");
-            log.info("Socket ID[{}] - Connected to chat module through", client.getSessionId().toString());
+
+            String room = client.getHandshakeData().getSingleUrlParam("room");
+            client.joinRoom(room);
+            log.info("Socket ID[{}] - room[{}]  Connected to chat module through", client.getSessionId().toString(),room);
         };
 
     }
