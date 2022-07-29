@@ -36,3 +36,17 @@
 ```bash
   docker-compose up --force-recreate
 ```
+
+## Example Images
+
+![example](./images/ex1.png)
+
+![example](./images/ex2.png)
+
+### Example Video:
+
+[https://www.youtube.com/watch?v=_BSXmWHKGEo](https://www.youtube.com/watch?v=_BSXmWHKGEo)
+
+### Frontend:
+
+[https://github.com/gurkanucar/collaborative-web-fe](https://github.com/gurkanucar/collaborative-web-fe)
